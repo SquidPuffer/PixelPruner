@@ -1,7 +1,12 @@
 # PixelPruner
 PixelPruner is a user-friendly image cropping app for AI-generated art. It supports PNG, JPG, JPEG, and WEBP formats. Easily crop, preview, and manage images with interactive previews, thumbnail views, rotation tools, and customizable output folders. Streamline your workflow and achieve perfect crops every time with PixelPruner.
 
-  ![image](https://github.com/theallyprompts/PixelPruner/assets/133992794/bf264a2a-1192-428b-9c73-7da4b17d7313)
+This fork is currently being updated by me (Squidpuffer), since it seems abandoned by the original creator, I decided to fork and update it, so far I have added a way to select a custom width and height and may add more features soon.
+  ![image](https://github.com/user-attachments/assets/775c2b75-1f88-4530-9b0b-cefde7157f6d)
+
+
+
+
  
 ---
 
@@ -36,11 +41,8 @@ PixelPruner is a user-friendly image cropping app for AI-generated art. It suppo
 
   ---
 
-## Installation Guide - Prebuilt App
+## Installation Guide - Prebuilt App (Coming soon)
 
-Head to the **[Releases](https://github.com/theallyprompts/PixelPruner/releases)** and download the latest .exe version - pre-packaged with Python and ready to run (no installation required!)
-
----
 
 ## Installation Guide - Manual Install
 
@@ -52,6 +54,7 @@ Follow these steps to install and run PixelPruner on your local machine.
 
 2. **Pillow**: This library is required for image processing. You can install it with the `pip` package manager.
 
+3. **Git**: You can install git by heading over to https://git-scm.com/downloads and choosing the appropriate option.
 ### Step-by-Step Installation
 
 1. **Clone the Repository**
@@ -59,12 +62,12 @@ Follow these steps to install and run PixelPruner on your local machine.
    Clone the PixelPruner repository from GitHub to your local machine using the following command:
 
    ```sh
-   git clone https://github.com/theallyprompts/PixelPruner.git
+   git clone https://github.com/SquidPuffer/PixelPruner.git
    ```
 
 2. **Navigate to the cloned directory**
 
-3. **Set Up a Virtual Environment (Optional but Recommended)**
+3. **Set Up a Virtual Environment (Optional but Highly Recommended)**
 
    It is recommended to use a virtual environment to manage dependencies. Create and activate a virtual environment:
 
@@ -102,9 +105,9 @@ Follow these steps to install and run PixelPruner on your local machine.
 
 **Select Folder**: After launching the app, you can either drag a set of images into the main pane, or go to `File > Set Input Folder`, to select a folder of input images.
 
-**Select Crop Dimensions**: From the dropdown in the top left, select the output dimensions for your crops.
+**Select Crop Dimensions**: From the dropdown in the top left, select the output dimensions for your crops. Or select Custom and enter desired width and height.
 
-**Set an output Directory** (optional): Click `File > Set Output Directory` to choose a folder to save your crops. If no directory is chosen, PixelPruner will place crops beside the original images. Note: if you've dragged images into PixelPruner, you must manually set an output directory.
+**Set an output Directory** (optional): Click `File > Set Output Directory` to choose a folder to save your crops. If no directory is chosen, PixelPruner will place crops beside the original images. **Note**: if you've dragged images into PixelPruner, you must manually set an output directory.
 
 **Crop and Manage Images**: Use the interactive tools to crop, rotate, and manage your images. Cropped images can be previewed and saved to a custom output folder.
 
@@ -114,22 +117,12 @@ Follow these steps to install and run PixelPruner on your local machine.
 
 ### Roadmap
 
-1. ~~**Add a toggle for advance-on-crop**: Why on earth did I add an auto-advance on crop? What a huge mistake! The next update will add a toggle to choose whether to advance-on-crop or remain on the current image.~~ Completed in v1.1.0
+5. ~~Custom Width and Custom Height~~ Addeed in **v2.1.0**
 
-2. ~~Input and Output Folder selection improvements - I want to be able to switch input directory mid cropping-session!~~ Completed in v1.2.0
+6. **User Settings** - The ability to save user preferences.
 
-3. ~~**More Options for Input** - Ability to drag a selection of images into the app for cropping, rather than select from a folder. That sounds useful.~~ Completed in v2.0.0
+7. **Simple image editing** - brightness, contrast, sharpness, etc. 
 
-4. ~~**A Better Menu** - A proper file menu system.~~ Added in v2.0.0
-
-5. **User Settings** - The ability to save user preferences.
-
-6. **Simple image editing** - brightness, contrast, sharpness, etc. I want to be able to do as much as possible as easily as possible, without having to photoshop anything prior to upload to Civitai.
-
-7. **API Access to Civitai.com's LoRA Trainer**: Upload zipped crops directly into Civitai.com's on-site LoRA trainer. The API for this doesn't exist yet, but maybe if I ask nicely...
-
+8. Build a .exe file for ease of use.
 ---
 
-### Created By...
-
-**[TheAlly](https://civitai.com/user/theally)** - A coding amateur with zero application development experience. I threw this together with the help of **ChatGPT 4o** because I couldn't find a tool which offered the features I required in a cropping/data set prep tool for LoRA Training.
