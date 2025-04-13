@@ -99,12 +99,52 @@ class PixelPruner:
 
         tk.Label(control_frame, text="Select crop size:").pack(side=tk.LEFT, padx=(10, 2))
         
-        self.size_var = tk.StringVar()
-        self.size_dropdown = ttk.Combobox(control_frame, textvariable=self.size_var, state="readonly", values=["512x512", "768x768", "1024x1024", "2048x2048"])
-        self.size_dropdown.pack(side=tk.LEFT, padx=(2, 20))
-        self.size_dropdown.set("512x512")  # Default size
-        self.size_dropdown.bind("<<ComboboxSelected>>", self.update_crop_box_size)
-        ToolTip(self.size_dropdown, "Choose the size of the crop area")
+        # Width Spinbox
+        tk.Label(control_frame, text="Width:").pack(side=tk.LEFT, padx=(10, 2))
+        self.width_var = tk.IntVar(value=512)
+        self.width_spinbox = tk.Spinbox(
+            control_frame,
+            from_=64,
+            to=4096,
+            increment=64,
+            textvariable=self.width_var,
+            width=5
+        )
+        self.width_spinbox.pack(side=tk.LEFT, padx=(2, 5))
+        self.width_spinbox.bind("<Return>", self.update_crop_box_size)
+        self.width_spinbox.bind("<KeyRelease>", self.update_crop_box_size)
+        ToolTip(self.width_spinbox, "Crop width in pixels (64-4096)")
+
+        # Height Spinbox
+        tk.Label(control_frame, text="Height:").pack(side=tk.LEFT, padx=(5, 2))
+        self.height_var = tk.IntVar(value=512)
+        self.height_spinbox = tk.Spinbox(
+            control_frame,
+            from_=64,
+            to=4096,
+            increment=64,
+            textvariable=self.height_var,
+            width=5
+        )
+        self.height_spinbox.pack(side=tk.LEFT, padx=(2, 20))
+        self.height_spinbox.bind("<Return>", self.update_crop_box_size)
+        self.height_spinbox.bind("<KeyRelease>", self.update_crop_box_size)
+        ToolTip(self.height_spinbox, "Crop height in pixels (64-4096)")
+
+        # Presets Dropdown
+        tk.Label(control_frame, text="Presets:").pack(side=tk.LEFT, padx=(10, 2))
+        self.presets_var = tk.StringVar()
+        self.presets_dropdown = ttk.Combobox(
+            control_frame,
+            textvariable=self.presets_var,
+            values=["512x512", "768x768", "1024x1024", "2048x2048", "Custom"],
+            state="readonly",
+            width=10
+        )
+        self.presets_dropdown.pack(side=tk.LEFT, padx=(2, 20))
+        self.presets_dropdown.set("512x512")
+        self.presets_dropdown.bind("<<ComboboxSelected>>", self.apply_preset)
+        ToolTip(self.presets_dropdown, "Select a preset crop size")
 
         self.prev_button = tk.Button(control_frame, text="< Prev", command=self.load_previous_image)
         self.prev_button.pack(side=tk.LEFT, padx=(10, 2))
@@ -161,7 +201,7 @@ class PixelPruner:
 
         # Create a frame for the crops pane with a scrollable canvas
         self.crops_frame = tk.Frame(self.main_frame)
-        self.crops_canvas = tk.Canvas(self.crops_frame, bg="gray", width=512)  # Set width to match preview pane
+        self.crops_canvas = tk.Canvas(self.crops_frame, bg="gray", width=512)
         self.crops_scrollbar = tk.Scrollbar(self.crops_frame, orient="vertical", command=self.crops_canvas.yview)
         self.crops_canvas.configure(yscrollcommand=self.crops_scrollbar.set)
         self.crops_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -173,7 +213,7 @@ class PixelPruner:
 
         self.status_bar = tk.Frame(master, bd=1, relief=tk.SUNKEN)
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
-        self.status_label = tk.Label(self.status_bar, text="Welcome to PixelPruner - Version 2.0.0", anchor=tk.W)
+        self.status_label = tk.Label(self.status_bar, text="Welcome to SquidPuffer's PixelPruner - Version 2.1.0", anchor=tk.W)
         self.status_label.pack(side=tk.LEFT, padx=10)
         self.cropped_images_label = tk.Label(self.status_bar, text="Images Cropped: 0", anchor=tk.E)
         self.cropped_images_label.pack(side=tk.RIGHT, padx=10)
@@ -189,11 +229,11 @@ class PixelPruner:
         self.output_folder = None
         self.original_size = (512, 512)
         self.current_size = (512, 512)
-        self.crop_counter = 0  # Global counter for all crops
-        self.cropped_images = []  # List to keep track of cropped images
-        self.cropped_thumbnails = []  # List to keep track of cropped thumbnails
-        self.preview_enabled = False  # Preview pane toggle
-        self.crops_enabled = False  # Crop thumbnails pane toggle
+        self.crop_counter = 0
+        self.cropped_images = []
+        self.cropped_thumbnails = []
+        self.preview_enabled = False
+        self.crops_enabled = False
 
         # Load delete image for the crops pane
         try:
@@ -230,6 +270,19 @@ class PixelPruner:
         
         # Center the window on the screen
         self.center_window()
+        
+        # Set focus to width spinbox
+        self.width_spinbox.focus_set()
+
+    def apply_preset(self, event=None):
+        """Apply selected preset to width/height spinboxes."""
+        preset = self.presets_var.get()
+        if preset == "Custom":
+            return  # Do nothing (let user use spinboxes)
+        width, height = map(int, preset.split('x'))
+        self.width_var.set(width)
+        self.height_var.set(height)
+        self.update_crop_box_size()
 
     def center_window(self):
         self.master.update_idletasks()
@@ -280,7 +333,7 @@ class PixelPruner:
         if PILLOW_VERSION >= "7.0.0":
             resampling_filter = Image.LANCZOS
         else:
-            resampling_filter = Image.ANTIALIAS
+            resampling_filter = Image.Resampling.LANCZOS
 
         self.tkimage = ImageTk.PhotoImage(self.current_image.resize((self.scaled_width, self.scaled_height), resampling_filter))
 
@@ -290,10 +343,10 @@ class PixelPruner:
         self.canvas.delete("all")
         self.canvas.create_image(self.image_offset_x, self.image_offset_y, anchor="nw", image=self.tkimage)
         self.image_scale = self.current_image.width / self.scaled_width
-        size = tuple(map(int, self.size_var.get().split('x')))
+        size = (self.width_var.get(), self.height_var.get())
         self.original_size = size
         self.current_size = size
-        scaled_size = (int(size[0] / self.image_scale), int(size[1] / self.image_scale))  # Define scaled_size here
+        scaled_size = (int(size[0] / self.image_scale), int(size[1] / self.image_scale))
         self.rect = self.canvas.create_rectangle(self.image_offset_x, self.image_offset_y, self.image_offset_x + scaled_size[0], self.image_offset_y + scaled_size[1], outline='red')
         self.update_crop_box_size()
         self.update_image_counter()
@@ -315,16 +368,35 @@ class PixelPruner:
 
     def update_crop_box_size(self, event=None):
         if self.rect:
-            self.canvas.delete(self.rect)  # Remove existing rectangle before creating a new one
-            size = tuple(map(int, self.size_var.get().split('x')))
-            self.original_size = size
-            self.current_size = size
-            scaled_size = (int(size[0] / self.image_scale), int(size[1] / self.image_scale))
+            self.canvas.delete(self.rect)
+            width = self.width_var.get()
+            height = self.height_var.get()
+            
+            # Input validation
+            width = max(64, min(4096, width))
+            height = max(64, min(4096, height))
+            
+            self.width_var.set(width)
+            self.height_var.set(height)
+            
+            self.original_size = (width, height)
+            self.current_size = (width, height)
+            scaled_size = (
+                int(width / self.image_scale), 
+                int(height / self.image_scale)
+            )
+            # Ensure the crop box doesn't exceed the image bounds
             if scaled_size[0] > self.scaled_width:
                 scaled_size = (self.scaled_width, self.scaled_width)
             if scaled_size[1] > self.scaled_height:
                 scaled_size = (self.scaled_height, self.scaled_height)
-            self.rect = self.canvas.create_rectangle(self.image_offset_x, self.image_offset_y, self.image_offset_x + scaled_size[0], self.image_offset_y + scaled_size[1], outline='red')
+            self.rect = self.canvas.create_rectangle(
+                self.image_offset_x, 
+                self.image_offset_y, 
+                self.image_offset_x + scaled_size[0], 
+                self.image_offset_y + scaled_size[1], 
+                outline='red'
+            )
 
     def on_mouse_move(self, event):
         if self.rect:
@@ -369,10 +441,10 @@ class PixelPruner:
     def on_mouse_wheel(self, event):
         if self.rect:
             increment = 50 if event.delta > 0 else -50
-            new_width = self.current_size[0] + increment
-            new_height = self.current_size[1] + increment
-            if new_width < 50 or new_height < 50:
-                return  # Prevent the rectangle from becoming too small
+            new_width = max(64, self.current_size[0] + increment)
+            new_height = max(64, self.current_size[1] + increment)
+            if new_width > 4096 or new_height > 4096:
+                return  # Prevent the rectangle from becoming too large
             scaled_width = int(new_width / self.image_scale)
             scaled_height = int(new_height / self.image_scale)
             if scaled_width > self.scaled_width or scaled_height > self.scaled_height:
@@ -664,8 +736,8 @@ class PixelPruner:
         about_window.geometry(f'{window_width}x{window_height}+{x}+{y}')
 
         about_text = (
-            "Version 2.0.0 - 5/19/2024\n\n"
-            "Developed by TheAlly and GPT4o\n\n"
+            "Version 2.1.0 - 13/04.2025\n\n"
+            "Originally Developed by TheAlly and GPT4o\n\n"
             "About: Prepare your LoRA training data with ease! "
             "Check out the GitHub Repo for the full feature list.\n\n"
         )
@@ -681,7 +753,7 @@ class PixelPruner:
         link = tk.Label(link_frame, text="https://github.com/theallyprompts/PixelPruner", fg="blue", cursor="hand2", padx=10)
         link.pack(side=tk.LEFT)
         link.bind("<Button-1>", lambda e: webbrowser.open_new("https://github.com/theallyprompts/PixelPruner"))
-
+        
 def main():
     root = TkinterDnD.Tk()
     app = PixelPruner(root)
